@@ -6,7 +6,7 @@ pydantic-settings==2.1.0
 python-dotenv==1.0.0
 
 # AME Engine (独立技术模块)
--e ../ame
+-e ./ame
 
 # LLM
 openai==1.10.0
