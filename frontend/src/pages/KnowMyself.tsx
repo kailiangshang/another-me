@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Brain, Loader } from 'lucide-react'
 import { analysisAPI } from '@/api'
 
@@ -49,16 +49,19 @@ export default function KnowMyself() {
                   ? 'bg-primary-600 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
-            >
-              {type.label}
-            </button>
+          >
+            {type.label}
+          </button>
           ))}
         </div>
+      </div>
 
+      {/* 生成报告按钮 */}
+      <div className="flex justify-center">
         <button
           onClick={generateReport}
           disabled={loading}
-          className="mt-4 w-full flex items-center justify-center gap-2 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-6 rounded-lg transition-colors disabled:opacity-50"
         >
           {loading ? (
             <>
@@ -72,107 +75,28 @@ export default function KnowMyself() {
             </>
           )}
         </button>
-
-        {error && (
-          <div className="mt-4 p-3 bg-red-50 text-red-600 rounded">
-            {error}
-          </div>
-        )}
       </div>
 
-      {/* 分析报告 */}
-      {report && (
-        <div className="space-y-6">
-          {/* 综合总结 */}
-          {report.summary && (
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold mb-4">📝 综合总结</h2>
-              <p className="text-gray-700 whitespace-pre-wrap">{report.summary}</p>
-            </div>
-          )}
-
-          {/* 情绪分析 */}
-          {report.emotions && (
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold mb-4">😊 情绪分析</h2>
-              <div className="space-y-3">
-                <div>
-                  <span className="text-gray-600">整体情绪：</span>
-                  <span className="font-semibold ml-2">
-                    {report.emotions.overall === 'positive' && '😊 积极'}
-                    {report.emotions.overall === 'negative' && '😔 消极'}
-                    {report.emotions.overall === 'neutral' && '😐 中性'}
-                  </span>
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="bg-green-50 p-3 rounded">
-                    <p className="text-sm text-gray-600">积极</p>
-                    <p className="text-2xl font-bold text-green-600">
-                      {report.emotions.distribution.positive || 0}
-                    </p>
-                  </div>
-                  <div className="bg-gray-50 p-3 rounded">
-                    <p className="text-sm text-gray-600">中性</p>
-                    <p className="text-2xl font-bold text-gray-600">
-                      {report.emotions.distribution.neutral || 0}
-                    </p>
-                  </div>
-                  <div className="bg-red-50 p-3 rounded">
-                    <p className="text-sm text-gray-600">消极</p>
-                    <p className="text-2xl font-bold text-red-600">
-                      {report.emotions.distribution.negative || 0}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 关键词 */}
-          {report.keywords && (
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold mb-4">🔑 高频关键词</h2>
-              <div className="flex flex-wrap gap-2">
-                {report.keywords.keywords?.slice(0, 20).map((kw: any, idx: number) => (
-                  <span
-                    key={idx}
-                    className="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm"
-                    style={{ fontSize: `${12 + kw.weight * 6}px` }}
-                  >
-                    {kw.word}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* 人际关系 */}
-          {report.relationships && (
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold mb-4">👥 人际关系</h2>
-              <div className="space-y-2">
-                {report.relationships.people?.map((person: any, idx: number) => (
-                  <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                    <span className="font-medium">{person.name}</span>
-                    <span className="text-sm text-gray-600">提及 {person.frequency} 次</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+      {/* 错误信息 */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+          {error}
         </div>
       )}
 
-      {/* 使用提示 */}
-      <div className="bg-blue-50 rounded-lg p-6">
-        <h3 className="font-semibold text-blue-900 mb-2">💡 分析说明</h3>
-        <ul className="space-y-1 text-sm text-blue-800">
-          <li>• <strong>综合分析</strong>：包含情绪、关键词、人际关系的全面分析</li>
-          <li>• <strong>情绪分析</strong>：分析你的整体情绪状态和变化趋势</li>
-          <li>• <strong>关键词</strong>：提取你最常提到的话题和概念</li>
-          <li>• <strong>人际关系</strong>：分析你经常提到的人和关系网络</li>
-        </ul>
-      </div>
+      {/* 报告展示 */}
+      {report && (
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">分析报告</h2>
+          <div className="prose max-w-none">
+            {typeof report === 'string' ? (
+              <div dangerouslySetInnerHTML={{ __html: report.replace(/\n/g, '<br />') }} />
+            ) : (
+              <pre className="whitespace-pre-wrap">{JSON.stringify(report, null, 2)}</pre>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

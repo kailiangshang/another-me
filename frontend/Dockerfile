@@ -5,8 +5,9 @@ WORKDIR /app
 # 复制 package 文件
 COPY package*.json ./
 
-# 安装依赖
+# 安装依赖，包括 vite 以支持类型检查
 RUN npm install
+RUN npm install --save-dev vite
 
 # 复制项目文件
 COPY . .
