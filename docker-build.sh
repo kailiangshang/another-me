@@ -39,7 +39,6 @@ docker volume create ${DATA_VOLUME} 2>/dev/null || echo "数据卷已存在"
 # 构建后端镜像
 echo -e "${GREEN}🔨 构建后端镜像...${NC}"
 docker build -t ${BACKEND_IMAGE} \
-    --build-arg PYTHONPATH=.:./ame:./backend \
     -f backend/Dockerfile \
     .
 
