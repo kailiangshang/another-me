@@ -1,0 +1,13 @@
+# AME - Another Me Engine Dependencies
+
+# Core dependencies
+numpy>=1.24.0
+openai>=1.0.0
+
+# Optional dependencies
+chromadb>=0.4.0  # For ChromaDB vector store
+Pillow>=10.0.0  # For image processing
+python-magic>=0.4.27  # For file type detection
+
+# Performance optimization
+psutil>=5.9.0  # For performance monitoring
