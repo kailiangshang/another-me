@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import router
+from app.api import config as config_router
 from app.core.config import settings
 from app.core.middleware import LoggingMiddleware, PerformanceMonitorMiddleware, ErrorTrackingMiddleware
 from app.core.logger import get_logger
@@ -10,8 +11,8 @@ logger = get_logger("main")
 
 app = FastAPI(
     title="Another Me - Backend Pipeline",
-    description="隐私优先的 AI 分身系统后端",
-    version="0.2.0"  # 升级版本号
+    description="隐私优先的 AI 分身系统后端 - 支持动态配置",
+    version="0.2.0"
 )
 
 # 创建必要的目录
@@ -39,6 +40,7 @@ app.add_middleware(LoggingMiddleware)
 
 # 注册路由
 app.include_router(router, prefix="/api/v1")
+app.include_router(config_router.router, prefix="/api/v1")  # 配置管理路由
 
 
 @app.get("/")
@@ -47,7 +49,8 @@ async def root():
     return {
         "message": "Welcome to Another Me API",
         "version": "0.2.0",
-        "status": "running"
+        "status": "running",
+        "is_configured": settings.is_configured()
     }
 
 
