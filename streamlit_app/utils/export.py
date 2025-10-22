@@ -1,12 +1,17 @@
 """
-报告导出工具 - 支持 Markdown、PDF、HTML
+报告导出工具 - 支持 Markdown、HTML（PDF 导出可选）
 """
 
 from typing import Dict, Any
 from pathlib import Path
 from datetime import datetime
 import markdown
-import pdfkit
+
+try:
+    import pdfkit
+    PDF_AVAILABLE = True
+except ImportError:
+    PDF_AVAILABLE = False
 
 
 def export_to_markdown(report_data: Dict[str, Any], output_path: str = None) -> str:
@@ -52,7 +57,7 @@ def export_to_markdown(report_data: Dict[str, Any], output_path: str = None) -> 
             md_content += "\n"
     
     md_content += "---\n\n"
-    md_content += f"*生成自 Another Me v0.4.0*\n"
+    md_content += f"*生成自 Another Me v0.5.0*\n"
     
     # 保存到文件
     if output_path:
@@ -150,7 +155,7 @@ def export_to_html(report_data: Dict[str, Any], output_path: str = None) -> str:
     <div class="container">
         {html_body}
         <div class="footer">
-            <p><em>生成自 Another Me v0.4.0</em></p>
+            <p><em>生成自 Another Me v0.5.0</em></p>
         </div>
     </div>
 </body>
@@ -165,7 +170,7 @@ def export_to_html(report_data: Dict[str, Any], output_path: str = None) -> str:
 
 def export_to_pdf(report_data: Dict[str, Any], output_path: str) -> bool:
     """
-    导出为 PDF 格式
+    导出为 PDF 格式（可选功能）
     
     Args:
         report_data: 报告数据
@@ -174,6 +179,10 @@ def export_to_pdf(report_data: Dict[str, Any], output_path: str) -> bool:
     Returns:
         是否成功
     """
+    if not PDF_AVAILABLE:
+        print("PDF 导出功能不可用：缺少 pdfkit 或 wkhtmltopdf")
+        return False
+    
     try:
         # 先生成 HTML
         html_content = export_to_html(report_data)

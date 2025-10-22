@@ -1,17 +1,16 @@
 """
-分析报告页面 - 支持导出 MD/PDF/HTML
+分析报告页面
 """
 
 import streamlit as st
 import sys
 import os
-import asyncio
 from datetime import datetime
 from pathlib import Path
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
-from utils.export import export_to_markdown, export_to_pdf, export_to_html
+from utils.export import export_to_markdown, export_to_pdf, export_to_html, PDF_AVAILABLE
 
 
 def show():
@@ -70,9 +69,16 @@ def show():
         # 导出选项
         st.subheader("📥 导出报告")
         
+        # 根据 PDF 是否可用选择格式
+        export_formats = ["Markdown (.md)", "HTML (.html)"]
+        if PDF_AVAILABLE:
+            export_formats.append("PDF (.pdf)")
+        else:
+            st.info("💡 PDF 导出不可用：缺少 wkhtmltopdf。可导出 HTML 后在浏览器中打印为 PDF。")
+        
         export_format = st.radio(
             "选择格式",
-            ["Markdown (.md)", "HTML (.html)", "PDF (.pdf)"],
+            export_formats,
             horizontal=True
         )
         

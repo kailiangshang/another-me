@@ -3,8 +3,8 @@
 streamlit>=1.28.0
 pandas>=2.0.0
 markdown>=3.5.0
-pdfkit>=1.0.0
 numpy>=1.24.0
+# pdfkit>=1.0.0  # PDF导出可选功能，需要 wkhtmltopdf
 
 # AME 核心依赖（复用）
 -e ../ame
