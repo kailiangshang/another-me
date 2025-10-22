@@ -7,11 +7,17 @@ LLM 调用模块
 from openai import OpenAI
 import os
 from typing import List, Dict, Optional, AsyncIterator
-from app.core.config import settings
 import time
 import hashlib
 import json
 from functools import lru_cache
+
+# 默认配置
+DEFAULT_CONFIG = {
+    "OPENAI_API_KEY": "",
+    "OPENAI_BASE_URL": "https://api.openai.com/v1",
+    "OPENAI_MODEL": "gpt-3.5-turbo"
+}
 
 
 class LLMCaller:
@@ -25,7 +31,20 @@ class LLMCaller:
     - 错误处理
     """
     
-    def __init__(self, max_retries: int = 3, cache_enabled: bool = True):
+    def __init__(self, api_key: str = None, base_url: str = None, model: str = None, max_retries: int = 3, cache_enabled: bool = True):
+        """
+        初始化 LLM 调用器
+        
+        Args:
+            api_key: OpenAI API Key
+            base_url: API Base URL
+            model: 默认模型
+            max_retries: 最大重试次数
+            cache_enabled: 是否启用缓存
+        """
+        self.api_key = api_key or os.getenv("OPENAI_API_KEY", DEFAULT_CONFIG["OPENAI_API_KEY"])
+        self.base_url = base_url or os.getenv("OPENAI_BASE_URL", DEFAULT_CONFIG["OPENAI_BASE_URL"])
+        self.model = model or os.getenv("OPENAI_MODEL", DEFAULT_CONFIG["OPENAI_MODEL"])
         self.client = None
         self.max_retries = max_retries
         self.cache_enabled = cache_enabled
@@ -34,13 +53,10 @@ class LLMCaller:
     
     def _init_client(self):
         """初始化 OpenAI 客户端"""
-        api_key = os.getenv("OPENAI_API_KEY", settings.OPENAI_API_KEY)
-        base_url = os.getenv("OPENAI_BASE_URL", settings.OPENAI_BASE_URL)
-        
-        if api_key:
+        if self.api_key:
             self.client = OpenAI(
-                api_key=api_key,
-                base_url=base_url
+                api_key=self.api_key,
+                base_url=self.base_url
             )
     
     def _get_cache_key(self, messages: List[Dict], model: str, temperature: float) -> str:
@@ -92,7 +108,7 @@ class LLMCaller:
             raise ValueError("OpenAI API key not configured")
         
         if not model:
-            model = os.getenv("OPENAI_MODEL", settings.OPENAI_MODEL)
+            model = self.model
         
         # 检查缓存
         cache_key = self._get_cache_key(messages, model, temperature)

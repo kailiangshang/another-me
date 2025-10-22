@@ -8,17 +8,28 @@ from chromadb.config import Settings
 import os
 from typing import List, Dict, Optional
 from datetime import datetime
-from app.core.config import settings as app_settings
 from .base import VectorStoreBase
+
+# 默认配置
+DEFAULT_VECTOR_DB_PATH = "./data/vector_store"
 
 
 class ChromaVectorStore(VectorStoreBase):
     """ChromaDB 向量存储实现"""
     
-    def __init__(self):
+    def __init__(self, db_path: str = None):
+        """
+        初始化 ChromaDB 向量存储
+        
+        Args:
+            db_path: 数据库路径
+        """
         # 初始化 ChromaDB (可替换为 Memu)
+        path = db_path or os.getenv("VECTOR_DB_PATH", DEFAULT_VECTOR_DB_PATH)
+        os.makedirs(path, exist_ok=True)
+        
         self.client = chromadb.PersistentClient(
-            path=app_settings.VECTOR_DB_PATH,
+            path=path,
             settings=Settings(anonymized_telemetry=False)
         )
         self.collection = self.client.get_or_create_collection(

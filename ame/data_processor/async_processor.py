@@ -4,12 +4,13 @@
 """
 
 import asyncio
+import logging
 from typing import List, Dict
 from concurrent.futures import ThreadPoolExecutor
 from .processor import DataProcessor
-from app.core.logger import get_logger
 
-logger = get_logger("async_processor")
+# 使用标准 logging
+logger = logging.getLogger(__name__)
 
 
 class AsyncDataProcessor:
