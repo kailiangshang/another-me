@@ -8,7 +8,7 @@ COPY package*.json ./
 # 安装依赖
 RUN npm install
 
-# 复制项目文件（包括 postcss.config.cjs）
+# 复制项目文件
 COPY . .
 
 # 构建
