@@ -5,7 +5,18 @@ WORKDIR /app
 # 安装系统依赖
 RUN apt-get update && apt-get install -y \
     build-essential \
-    wkhtmltopdf \
+    wget \
+    xfonts-75dpi \
+    xfonts-base \
+    fontconfig \
+    libxrender1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# 安装 wkhtmltopdf（从官方源）
+RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.bullseye_amd64.deb \
+    && apt-get update \
+    && apt-get install -y ./wkhtmltox_0.12.6.1-2.bullseye_amd64.deb \
+    && rm wkhtmltox_0.12.6.1-2.bullseye_amd64.deb \
     && rm -rf /var/lib/apt/lists/*
 
 # 复制 AME 模块
