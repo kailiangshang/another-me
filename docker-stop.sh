@@ -4,16 +4,15 @@
 
 set -e
 
-BACKEND_CONTAINER="another-me-backend"
-FRONTEND_CONTAINER="another-me-frontend"
+STREAMLIT_CONTAINER="another-me-streamlit"
 
 echo "🛑 停止 Another Me..."
 
 # 停止容器
-docker stop ${BACKEND_CONTAINER} ${FRONTEND_CONTAINER} 2>/dev/null || true
+docker stop ${STREAMLIT_CONTAINER} 2>/dev/null || true
 
 # 删除容器
-docker rm ${BACKEND_CONTAINER} ${FRONTEND_CONTAINER} 2>/dev/null || true
+docker rm ${STREAMLIT_CONTAINER} 2>/dev/null || true
 
 echo "✅ Another Me 已停止"
 echo ""

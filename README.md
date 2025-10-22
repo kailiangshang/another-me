@@ -4,19 +4,34 @@
 
 > 用你的聊天记录、日记、照片训练出一个"像你"的 AI。所有数据仅存本地，无需联网。
 
-[![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](DOCUMENTATION.md#版本历史)
+[![Version](https://img.shields.io/badge/version-0.5.0-blue.svg)](DOCUMENTATION.md#版本历史)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](backend/requirements.txt)
-[![React](https://img.shields.io/badge/react-18.2-blue.svg)](frontend/package.json)
+[![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](streamlit_app/requirements.txt)
+[![Streamlit](https://img.shields.io/badge/streamlit-1.28-red.svg)](streamlit_app/)
 
 ---
 
-## ✨ 新特性 (v0.3.0)
+## ✨ 最新更新 (v0.4.0) - 重大架构升级
 
-- 🔑 **动态 API Key 配置**：支持先启动后配置，无需预先填写 .env
-- 🎯 **复杂召回策略**：混合检索（向量+关键词+时间）、智能重排序
-- 🐳 **独立 Docker 构建**：不依赖 docker-compose，简化部署流程
-- 🏛️ **模块化设计**：所有技术模块均提供抽象基类和工厂模式，支持自定义扩展
+### 🎨 **前端框架迁移**
+- ❌ ~~React + Vite~~ → ✅ **Streamlit** (Python全栈)
+- 更简洁的用户界面，更快的开发迭代
+- 统一技术栈，降低维护成本
+
+### 🏗️ **AME 模块重构**
+- 📚 **RAG 模块**: 知识库管理，文档上传，问答检索
+- 💬 **MEM 模块**: 记忆用户交互，模仿用户说话风格
+- 清晰的职责分离，更易扩展
+
+### 🌊 **流式输出支持**
+- 对话实时流式返回，更好的交互体验
+- 支持长文本生成，无需等待
+
+### 📄 **多格式报告导出**
+- 📝 Markdown (.md)
+- 🌐 HTML (.html)
+- 📄 PDF (.pdf)
+- 一键生成分析报告
 
 ---
 
@@ -29,29 +44,33 @@
 
 ---
 
-## 💼 业务功能
+## 🎯 核心功能
 
-### 1. 模仿我说话 (Mimic Me)
-让 AI 用你的语气、风格和思维方式回应问题。
+### 📚 RAG - 知识库管理
+上传个人笔记、文档、资料，构建专属知识库。
 
-**场景示例：**
-- "如果我在 2020 年听到这句话，我会怎么回答？"
-- "帮我写一条朋友圈，要像我自己写的。"
+**功能**：
+- 📁 文档上传（TXT, MD, PDF, DOCX）
+- 🔍 智能检索（混合检索策略）
+- 📂 知识库管理（查看、搜索、删除）
+- 📊 统计分析（来源分布、时间趋势）
 
-### 2. 自我认知分析 (Know Myself)
-帮你更客观地认识自己，发现盲点。
+### 💬 MEM - 记忆与模仿
+与 AI 分身对话，它会模仿你的说话风格。
 
-**场景示例：**
-- "我最近情绪怎么样？"
-- "我最常提到的人是谁？"
-- "我的价值观有哪些关键词？"
+**功能**：
+- 📝 学习你的聊天记录
+- 🌊 流式对话体验
+- 🧠 记忆管理（查看、搜索、时间线）
+- 💾 记忆导出（JSON 格式）
 
-### 3. 记忆回溯对话 (Remember Me)
-唤醒你遗忘的记忆，实现"时空对话"。
+### 📊 分析报告
+生成自我认知分析报告。
 
-**场景示例：**
-- "去年这个时候我在想什么？"
-- "上次我遇到类似问题是怎么解决的？"
+**功能**：
+- 📝 情绪分析
+- 🔑 关键词提取
+- 📄 导出 MD/HTML/PDF
 
 
 
@@ -59,81 +78,66 @@
 
 ```
 another-me/
-├── ame/              # AME - Another Me Engine（独立技术模块引擎）
-│   ├── data_processor/   # 数据处理模块
-│   ├── vector_store/     # 向量存储模块（支持 Memu/ChromaDB）
-│   ├── llm_caller/       # LLM 调用模块
-│   ├── rag_generator/    # RAG 生成模块
-│   └── retrieval/        # 检索模块（新）- 混合检索、重排序
-├── backend/          # 后端 Pipeline（业务编排层）
-│   ├── app/
-│   │   ├── api/         # API 路由（含配置管理）
-│   │   ├── services/    # 业务服务（调用 AME 模块）
-│   │   └── core/        # 核心配置（支持动态配置）
-├── frontend/         # 前端（用户交互层）
-├── docker-build.sh   # Docker 构建脚本（新）
-└── docker-stop.sh    # Docker 停止脚本（新）
+├── ame/                  # AME - Another Me Engine（独立技术模块）
+│   ├── rag/              # RAG 模块：知识库管理
+│   ├── mem/              # MEM 模块：记忆与模仿
+│   ├── data_processor/   # 数据处理
+│   ├── vector_store/     # 向量存储
+│   ├── llm_caller/       # LLM 调用
+│   └── retrieval/        # 复杂检索
+├── streamlit_app/        # Streamlit 前端应用
+│   ├── pages/            # 页面模块
+│   │   ├── home_page.py         # 主页
+│   │   ├── config_page.py       # 配置页面
+│   │   ├── rag_page.py          # RAG 知识库
+│   │   ├── knowledge_manager_page.py  # 知识库管理
+│   │   ├── mem_page.py          # MEM 对话
+│   │   ├── memory_manager_page.py     # 记忆管理
+│   │   └── analysis_page.py     # 分析报告
+│   ├── utils/            # 工具模块
+│   └── app.py            # 主应用
+├── docker-build-streamlit.sh
+└── README.md
 ```
 
 **三层分离架构**：
-- **Frontend**: 数据上传、业务选择、配置管理
-- **Backend Pipeline**: 业务编排，调用 AME 技术模块
-- **AME Engine**: 独立技术模块，可复用、可测试
+- **Streamlit UI**: Python 全栈前端，简洁高效
+- **AME RAG**: 知识库管理、文档检索
+- **AME MEM**: 记忆学习、风格模仿
 
 ## 🚀 快速开始
 
-### 方式 1：Docker 部署（推荐）
+### 方式 1：Streamlit 本地运行（推荐）
 
 ```bash
-# 1. 可选：配置 .env 文件（也可以启动后在前端配置）
-cp .env.example .env
-vim .env  # 填入 OpenAI API Key
+cd streamlit_app
+./run.sh
 
-# 2. 一键构建和启动
-./docker-build.sh
-
-# 3. 访问应用
-# 前端: http://localhost:3000
-# 后端: http://localhost:8000
-# API 文档: http://localhost:8000/docs
-
-# 停止服务
-./docker-stop.sh
+# 访问: http://localhost:8501
 ```
 
-### 方式 2：本地开发
+### 方式 2：Docker 部署
 
 ```bash
-# 后端
-cd backend
-python -m venv venv
-source venv/bin/activate
-export PYTHONPATH="${PYTHONPATH}:$(pwd)/..:$(pwd)/../ame"
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+# 一键构建和启动
+./docker-build-streamlit.sh
 
-# 前端
-cd frontend
-npm install
-npm run dev
+# 访问: http://localhost:8501
 ```
 
-### 🔑 API Key 配置
+### 🔑 初次使用
 
-**两种方式任选其一**：
-
-1. **启动后配置**：访问前端，在设置页面配置 API Key
-2. **.env 文件**：在 `.env` 中预先配置 `OPENAI_API_KEY`
+1. 访问应用
+2. 点击侧边栏 **“⚙️ 配置”**
+3. 输入 OpenAI API Key
+4. 点击 **“💾 保存配置”**
+5. 开始使用！
 
 ## 📖 完整文档
 
-查看 [**DOCUMENTATION.md**](DOCUMENTATION.md) 获取：
-- 详细使用指南
-- 开发文档
-- API 文档
-- 技术优化说明
-- 故障排查
-- 更多示例
+- [**DOCUMENTATION.md**](DOCUMENTATION.md) - 完整的技术文档和使用指南
+- [**CHANGELOG.md**](CHANGELOG.md) - 版本更新日志
+- [**ame/README.md**](ame/README.md) - AME 技术引擎文档
 
 ## 🔐 隐私保证
 
@@ -143,16 +147,16 @@ npm run dev
 
 ## 🛠️ 技术栈
 
-**前端**: React + Vite + TypeScript + TailwindCSS  
-**后端**: FastAPI + Python 3.11+ + 动态配置  
-**AME 引擎**: 独立技术模块（v0.3.0）
-- 📊 数据处理：基类 + 多格式支持
-- 📦 向量存储：Memu/ChromaDB + 工厂模式
-- 🤖 LLM 调用：抽象基类 + 重试缓存
-- 🎯 复杂检索：混合策略 + 重排序  
+**前端**: Streamlit (Python 全栈)  
+**AME 引擎**: v0.5.0
+- 📚 **RAG 模块**: 知识库管理、文档检索、知识分析
+- 💬 **MEM 模块**: 记忆学习、风格模仿、记忆管理
+- 📊 数据处理 + 📦 向量存储 (Memu/ChromaDB)
+- 🤖 LLM 调用 + 🎯 复杂检索  
+**特性**: 流式输出 + MD/PDF/HTML 导出 + 可视化统计  
 **部署**: Docker 独立构建
 
-> **AME (详见 `ame/README.md`)**: 独立的技术模块引擎，所有模块均支持自定义扩展
+> **AME (详见 `ame/README.md`)**: 独立的技术模块引擎，支持自定义扩展
 
 
 

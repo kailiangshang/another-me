@@ -1,7 +1,7 @@
 # 📚 Another Me - 完整文档
 
-**版本**: v0.2.0  
-**更新日期**: 2024-10-20
+**版本**: v0.5.0  
+**更新日期**: 2025-10-22
 
 ---
 
@@ -9,16 +9,13 @@
 
 1. [快速开始](#快速开始)
 2. [核心功能](#核心功能)
-3. [架构设计](#架构设计)
-4. [安装部署](#安装部署)
-5. [使用指南](#使用指南)
-6. [API 文档](#api-文档)
-7. [开发指南](#开发指南)
-8. [技术优化](#技术优化)
-9. [数据格式](#数据格式)
-10. [故障排查](#故障排查)
-11. [贡献指南](#贡献指南)
-12. [版本历史](#版本历史)
+3. [使用指南](#使用指南)
+4. [架构设计](#架构设计)
+5. [安装部署](#安装部署)
+6. [开发指南](#开发指南)
+7. [技术优化](#技术优化)
+8. [故障排查](#故障排查)
+9. [版本历史](#版本历史)
 
 ---
 
@@ -27,97 +24,83 @@
 ### 一键部署（推荐）
 
 ```bash
-# 1. 配置环境变量
+# 1. 配置环境变量（可选）
 cp .env.example .env
 vim .env  # 填入你的 OpenAI API Key
 
 # 2. 启动服务
-./start.sh
+./docker-build-streamlit.sh
 
 # 3. 访问应用
-# 前端: http://localhost:3000
-# 后端: http://localhost:8000
-# API 文档: http://localhost:8000/docs
+# Streamlit 前端: http://localhost:8501
 ```
 
-### 本地开发
+### 本地运行
 
-#### 后端
 ```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+cd streamlit_app
+./run.sh
 
-# 设置 Python Path（确保可以导入 ame 模块）
-export PYTHONPATH="${PYTHONPATH}:$(pwd)/..:$(pwd)/../ame"
-
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+# 访问: http://localhost:8501
 ```
 
-#### 前端
-```bash
-cd frontend
-npm install
-npm run dev
-```
+### 初次使用
 
-#### 单独使用 AME 模块
-```bash
-cd ame
-pip install -e .  # 以可编辑模式安装
-
-# 现在可以在任意 Python 环境中使用
-from ame import DataProcessor, VectorStoreFactory
-```
+1. 访问应用
+2. 点击侧边栏 **"⚙️ 配置"**
+3. 输入 OpenAI API Key
+4. 选择模型（推荐 gpt-4 或 gpt-3.5-turbo）
+5. 点击 **"💾 保存配置"**
+6. 开始使用！
 
 ---
 
 ## 💡 核心功能
 
-### 1. 模仿我说话 (Mimic Me)
+### 1. 📚 RAG - 知识库管理
 
-**功能**：让 AI 用你的语气、风格和思维方式回应问题
+**功能**：上传个人笔记、文档、资料，构建专属知识库
+
+**特性**：
+- 📁 **文档上传**：支持 TXT, MD, PDF, DOCX, JSON 等格式
+- 🔍 **智能检索**：混合检索策略（向量 + 关键词 + 时间）
+- 📂 **知识管理**：查看、搜索、删除、按来源筛选
+- 📊 **统计分析**：来源分布、时间趋势可视化
 
 **使用场景**：
-- "如果我在2020年听到这句话，我会怎么回答？"
+- 构建个人知识库，随时检索
+- 知识问答，智能推荐
+- 专题学习，内容汇总
+
+### 2. 💬 MEM - 记忆与模仿
+
+**功能**：与 AI 分身对话，模仿你的说话风格
+
+**特性**：
+- 📝 **学习记录**：从聊天记录中学习你的表达习惯
+- 🌊 **流式对话**：实时生成，自然流畅
+- 🧠 **记忆管理**：查看、搜索、时间线浏览
+- 💾 **记忆导出**：JSON 格式备份
+
+**使用场景**：
+- "如果是我，我会怎么说？"
 - "帮我写一条朋友圈，要像我自己写的。"
+- 时空对话：“去年这个时候我在想什么？”
 
-**如何使用**：
-1. 访问 `/mimic` 页面
-2. 选择模式（对话 / 生成朋友圈）
-3. 输入问题或主题
-4. 获取风格一致的回复
+### 3. 📊 分析报告
 
-### 2. 自我认知分析 (Know Myself)
-
-**功能**：客观认识自己，发现盲点
+**功能**：生成自我认知分析报告
 
 **分析内容**：
-- 😊 情绪分析 - 整体情绪状态和变化趋势
-- 🔑 关键词提取 - 最常提到的话题和概念
-- 👥 人际关系 - 经常提到的人和关系网络
-- 📝 综合报告 - AI 生成的自我认知总结
+- 😊 **情绪分析**：整体情绪状态和变化趋势
+- 🔑 **关键词提取**：最常提到的话题和概念
+- 👥 **人际关系**：经常提到的人和关系网络
+- 📝 **综合报告**：AI 生成的自我认知总结
 
-**如何使用**：
-1. 访问 `/analysis` 页面
-2. 选择分析类型
-3. 点击"生成分析报告"
-4. 查看可视化结果
-
-### 3. 记忆回溯对话 (Remember Me)
-
-**功能**：唤醒遗忘的记忆，实现"时空对话"
-
-**使用场景**：
-- "去年这个时候我在想什么？"
-- "上次我遇到类似问题是怎么解决的？"
-
-**如何使用**：
-1. 访问 `/memory` 页面
-2. 输入你的问题
-3. 可选：添加时间上下文（如"2020-03"、"去年"）
-4. 获取相关记忆片段和 AI 总结
+**导出格式**：
+- Markdown (.md)
+- HTML (.html)
+- PDF (.pdf)
 
 ---
 
@@ -127,57 +110,56 @@ from ame import DataProcessor, VectorStoreFactory
 
 ```
 ┌─────────────────────────────────────┐
-│      Frontend (React + Vite)       │
-│  数据上传 | API配置 | 业务功能界面 │
+│      Streamlit Frontend           │
+│  数据上传 | UI交互 | 业务功能界面 │
 └─────────────────────────────────────┘
-                 ↓ HTTP/REST API
+                 ↓ 直接调用
 ┌─────────────────────────────────────┐
-│    Backend Pipeline (FastAPI)      │
-│   业务编排 | API网关 | 模块调用    │
-└─────────────────────────────────────┘
-                 ↓ 模块调用
-┌─────────────────────────────────────┐
-│   AME Engine (独立技术模块)     │
-│ Data Processor | Vector Store      │
-│ LLM Caller | RAG Generator         │
+│   AME Engine (技术模块引擎)    │
+│ RAG | MEM | Vector Store        │
+│ LLM Caller | Retrieval          │
 └─────────────────────────────────────┘
 ```
 
 **设计理念**：
-- **Frontend**: 用户交互层，负责数据上传、配置、业务选择
-- **Backend Pipeline**: 业务编排层，调用 AME 模块实现业务逻辑
+- **Streamlit Frontend**: Python 全栈前端，直接调用 AME 模块
 - **AME Engine**: 独立技术模块引擎，可复用、可测试、可扩展
+- **简单直接**: 无需中间层，前端直接使用技术模块
 
 ### 目录结构
 
 ```
 another-me/
 ├── ame/                  # AME - Another Me Engine（独立技术模块）
-│   ├── data_processor/   # 数据处理：文本、图片、音频分析
+│   ├── data_processor/   # 数据处理：文本分析、情绪识别
 │   ├── vector_store/     # 向量存储：Memu/ChromaDB实现
 │   ├── llm_caller/       # LLM调用：OpenAI API封装
+│   ├── rag/              # RAG模块：知识库管理
+│   ├── mem/              # MEM模块：记忆模仿
+│   ├── retrieval/        # 检索模块：混合检索、重排序
 │   ├── rag_generator/    # RAG生成：检索增强生成
 │   ├── __init__.py       # 模块导出
 │   ├── setup.py          # 安装配置
 │   ├── requirements.txt  # 依赖列表
 │   └── README.md         # AME 文档
-├── backend/              # 后端 Pipeline
-│   ├── app/
-│   │   ├── api/         # API 路由
-│   │   ├── services/    # 业务服务（使用 AME）
-│   │   ├── core/        # 日志、缓存、中间件
-│   │   └── main.py      # 入口
-│   └── requirements.txt
-├── frontend/            # 前端
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── store/       # Zustand 状态管理
-│   │   └── App.tsx
-│   └── package.json
+├── streamlit_app/        # Streamlit 前端应用
+│   ├── pages/            # 页面模块
+│   │   ├── home_page.py         # 主页
+│   │   ├── config_page.py       # 配置页面
+│   │   ├── rag_page.py          # RAG 知识库
+│   │   ├── knowledge_manager_page.py  # 知识库管理
+│   │   ├── mem_page.py          # MEM 对话
+│   │   ├── memory_manager_page.py     # 记忆管理
+│   │   └── analysis_page.py     # 分析报告
+│   ├── utils/            # 工具模块
+│   ├── app.py            # 主应用
+│   ├── requirements.txt  # 前端依赖
+│   └── run.sh            # 启动脚本
+├── docker-build-streamlit.sh
 ├── docker-compose.yml
 ├── README.md
-└── DOCUMENTATION.md
+├── DOCUMENTATION.md
+└── CHANGELOG.md
 ```
 
 ### AME Engine 详细说明
@@ -257,17 +239,31 @@ DATA_DIR=./data
 ### Docker 部署
 
 ```bash
-# 启动
-./start.sh
+# 一键启动
+./docker-build-streamlit.sh
 
-# 停止
-./stop.sh
+# 访问: http://localhost:8501
+
+# 停止服务
+./docker-stop.sh
 
 # 查看日志
-docker-compose logs -f
+docker logs -f another-me-streamlit
+```
 
-# 重启
-docker-compose restart
+### 本地运行
+
+```bash
+cd streamlit_app
+
+# 安装依赖
+pip install -r requirements.txt
+
+# 运行应用
+streamlit run app.py
+
+# 或使用脚本
+./run.sh
 ```
 
 ---
@@ -720,14 +716,100 @@ store = VectorStoreFactory.create("chroma")
 
 ---
 
-## 📞 获取帮助
+## 📖 版本历史
 
-- 📖 查看本文档
-- 🐛 提交 Issue
-- 💬 查看日志：`docker-compose logs -f`
+### [v0.5.0] - 2025-10-22
+
+#### ✨ 新增功能
+
+- **📂 知识库管理页面**
+  - 独立的知识库管理页面，可视化展示所有上传的知识内容
+  - 支持按来源、时间筛选和全文搜索
+  - 提供单条删除、批量管理功能
+  - 知识库统计和可视化分析（来源分布、时间趋势）
+  - 分页浏览，提升大数据量下的性能
+
+- **🧠 记忆管理页面**
+  - 独立的记忆管理页面，查看所有 MEM 学习的对话历史
+  - 时间线视图，按日期浏览对话记忆
+  - 按来源分类查看（手动输入、上传文件、实时对话等）
+  - 记忆搜索和过滤功能
+  - 记忆导出功能（JSON 格式）
+  - 记忆统计分析（来源分布、活跃时段）
+
+- **🏠 主页概览**
+  - 新增主页，提供系统状态一览
+  - 快速访问各功能模块的入口
+  - 实时显示 RAG 和 MEM 模块的统计数据
+  - 功能介绍和使用指南
+
+- **📊 增强统计卡片**
+  - RAG 和 MEM 页面顶部添加实时统计卡片
+  - 快速跳转到管理页面的按钮
+  - 可视化数据展示（柱状图、折线图）
+
+#### 🔧 改进优化
+
+- 优化导航结构，新增主页和管理页面
+- 所有列表页面支持分页，避免一次加载过多数据
+- 添加快速搜索和筛选功能
+- 改进页面布局和视觉层次
+- 确保所有 VectorStore 实现提供 `get_all_documents()` 方法
+- 确保所有 VectorStore 实现提供 `get_documents_by_date_range()` 方法
+
+#### 🗑️ 删除内容
+
+- 删除冗余的 `backend/` 文件夹（不再需要 FastAPI 后端）
+- 更新 Docker 配置，移除 backend 服务引用
+- 删除 USER_GUIDE.md，内容合并到 DOCUMENTATION.md
 
 ---
 
-**Another Me v0.2.0** - 更强大的 AI 分身系统 🚀
+### [v0.4.0] - 2025-10-20
 
-最后更新：2024-10-20
+#### 🎨 前端框架迁移
+
+- 从 React + Vite 迁移到 Streamlit
+- 实现 Python 全栈开发
+- 简化部署和维护
+
+#### 🏭 架构重构
+
+- 将技术模块独立到 `ame/` 文件夹
+- RAG 和 MEM 模块分离
+- 提供抽象基类和工厂模式
+
+#### 🌊 流式输出
+
+- MEM 对话支持流式输出
+- 改善长文本生成的用户体验
+
+#### 📄 多格式导出
+
+- 分析报告支持 Markdown、HTML、PDF 导出
+
+---
+
+### [v0.3.0] - 2025-10-15
+
+#### 初始版本
+
+- 基础 RAG 知识库功能
+- MEM 记忆模仿功能
+- React 前端界面
+- FastAPI 后端
+
+---
+
+## 📞 获取帮助
+
+- 📖 查看本文档
+- 🐛 提交 Issue: [GitHub](https://github.com/yourusername/another-me/issues)
+- 💬 查看日志：`docker logs -f another-me-streamlit`
+- 📚 AME 文档：[ame/README.md](ame/README.md)
+
+---
+
+**Another Me v0.5.0** - 更强大的 AI 分身系统 🚀
+
+最后更新：2025-10-22
