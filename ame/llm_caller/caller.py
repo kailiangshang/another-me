@@ -173,3 +173,58 @@ class LLMCaller:
         ]
         
         return await self.generate(messages, temperature=temperature)
+    
+    async def generate_stream(
+        self,
+        messages: List[Dict[str, str]],
+        model: Optional[str] = None,
+        temperature: float = 0.7,
+        max_tokens: Optional[int] = None
+    ) -> AsyncIterator[str]:
+        """
+        流式生成文本
+        
+        Args:
+            messages: 消息列表
+            model: 模型名称
+            temperature: 温度
+            max_tokens: 最大 token 数
+            
+        Yields:
+            生成的文本片段
+        """
+        if not self.client:
+            self._init_client()
+        
+        if not self.client:
+            raise ValueError("OpenAI API key not configured")
+        
+        if not model:
+            model = self.model
+        
+        # 重试机制
+        last_error = None
+        for attempt in range(self.max_retries):
+            try:
+                response = self.client.chat.completions.create(
+                    model=model,
+                    messages=messages,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    stream=True
+                )
+                
+                for chunk in response:
+                    if chunk.choices[0].delta.content:
+                        yield chunk.choices[0].delta.content
+                
+                return
+            
+            except Exception as e:
+                last_error = e
+                if attempt < self.max_retries - 1:
+                    wait_time = (2 ** attempt) * 0.5
+                    time.sleep(wait_time)
+                    continue
+        
+        raise Exception(f"LLM generation failed after {self.max_retries} attempts: {str(last_error)}")

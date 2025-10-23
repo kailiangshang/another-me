@@ -24,6 +24,9 @@ RUN mkdir -p /app/data/rag_uploads \
     /app/data/rag_vector_store \
     /app/data/mem_vector_store
 
+# 声明数据卷
+VOLUME ["/app/data"]
+
 # 暴露端口
 EXPOSE 8501
 

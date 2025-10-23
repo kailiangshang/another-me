@@ -20,7 +20,7 @@ class MimicEngine:
         self,
         llm_caller: LLMCaller,
         vector_store_type: str = "memu",
-        db_path: str = "./data/mem_vector_store"
+        db_path: str = "/app/data/mem_vector_store"
     ):
         """
         初始化模仿引擎

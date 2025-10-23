@@ -34,6 +34,11 @@ init_session_state()
 
 # 侧边栏
 with st.sidebar:
+    # Logo
+    logo_path = os.path.join(os.path.dirname(__file__), '..', 'another me logo.jpg')
+    if os.path.exists(logo_path):
+        st.image(logo_path, use_container_width=True)
+    
     st.title("🌟 Another Me")
     st.markdown("**世界上另一个我**")
     st.markdown("---")

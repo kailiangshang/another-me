@@ -1,37 +1,29 @@
 # Another Me 🌟
 
-**世界上另一个我 —— 隐私优先的 AI 分身系统**
+**世界上另一个我 —— AI 数字分身系统**
 
-> 用你的聊天记录、日记、照片训练出一个"像你"的 AI。所有数据仅存本地，无需联网。
+> 用你的聊天记录、日记、知识训练出一个"像你"的 AI。数据本地存储，隐私安全。
 
-[![Version](https://img.shields.io/badge/version-0.5.0-blue.svg)](DOCUMENTATION.md#版本历史)
+[![Version](https://img.shields.io/badge/version-0.6.0-blue.svg)](DOCUMENTATION.md#版本历史)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](streamlit_app/requirements.txt)
 [![Streamlit](https://img.shields.io/badge/streamlit-1.28-red.svg)](streamlit_app/)
 
 ---
 
-## ✨ 最新更新 (v0.4.0) - 重大架构升级
+## ✨ 最新更新 (v0.6.0) - 优化版本
 
-### 🎨 **前端框架迁移**
-- ❌ ~~React + Vite~~ → ✅ **Streamlit** (Python全栈)
-- 更简洁的用户界面，更快的开发迭代
-- 统一技术栈，降低维护成本
+### 🔧 **项目优化**
+- ✅ 修复 streamlit_app 引用 ame 项目的 import 错误
+- ✅ 删除后端相关的冗余文件，项目纯 Streamlit 化
+- ✅ 集成 Logo 图片到侧边栏，提升品牌辨识度
+- ✅ Docker 启动支持交互式配置（端口、数据目录）
+- ✅ 数据持久化支持（知识库和 MEM 存储）
+- ✅ 文档精简，只保留 README.md 和 DOCUMENTATION.md
 
-### 🏗️ **AME 模块重构**
-- 📚 **RAG 模块**: 知识库管理，文档上传，问答检索
-- 💬 **MEM 模块**: 记忆用户交互，模仿用户说话风格
-- 清晰的职责分离，更易扩展
-
-### 🌊 **流式输出支持**
-- 对话实时流式返回，更好的交互体验
-- 支持长文本生成，无需等待
-
-### 📄 **多格式报告导出**
-- 📝 Markdown (.md)
-- 🌐 HTML (.html)
-- 📄 PDF (.pdf)
-- 一键生成分析报告
+### 🌊 **流式输出修复**
+- 修复 LLM 流式输出支持，实现真正的实时对话
+- MEM 对话页面流畅体验
 
 ---
 
@@ -136,7 +128,6 @@ cd streamlit_app
 ## 📖 完整文档
 
 - [**DOCUMENTATION.md**](DOCUMENTATION.md) - 完整的技术文档和使用指南
-- [**CHANGELOG.md**](CHANGELOG.md) - 版本更新日志
 - [**ame/README.md**](ame/README.md) - AME 技术引擎文档
 
 ## 🔐 隐私保证
@@ -148,7 +139,7 @@ cd streamlit_app
 ## 🛠️ 技术栈
 
 **前端**: Streamlit (Python 全栈)  
-**AME 引擎**: v0.5.0
+**AME 引擎**: v0.6.0
 - 📚 **RAG 模块**: 知识库管理、文档检索、知识分析
 - 💬 **MEM 模块**: 记忆学习、风格模仿、记忆管理
 - 📊 数据处理 + 📦 向量存储 (Memu/ChromaDB)

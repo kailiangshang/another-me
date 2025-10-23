@@ -22,7 +22,7 @@ class KnowledgeBase:
     def __init__(
         self,
         vector_store_type: str = "memu",
-        db_path: str = "./data/rag_vector_store"
+        db_path: str = "/app/data/rag_vector_store"
     ):
         """
         初始化知识库
