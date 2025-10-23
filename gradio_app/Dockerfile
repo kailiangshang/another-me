@@ -14,7 +14,7 @@ COPY ame /app/ame
 COPY gradio_app /app/gradio_app
 
 # 复制 Logo
-COPY "another me logo.jpg" /app/
+COPY ["another me logo.jpg", "/app/"]
 
 # 安装 Python 依赖
 WORKDIR /app/gradio_app
