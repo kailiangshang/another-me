@@ -1,0 +1,9 @@
+# Gradio 前端依赖
+
+gradio>=4.0.0
+pandas>=2.0.0
+markdown>=3.5.0
+numpy>=1.24.0
+
+# AME 核心依赖（复用）
+-e ../ame

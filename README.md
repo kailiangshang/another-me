@@ -4,26 +4,33 @@
 
 > 用你的聊天记录、日记、知识训练出一个"像你"的 AI。数据本地存储，隐私安全。
 
-[![Version](https://img.shields.io/badge/version-0.6.0-blue.svg)](DOCUMENTATION.md#版本历史)
+[![Version](https://img.shields.io/badge/version-0.7.0-blue.svg)](DOCUMENTATION.md#版本历史)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](streamlit_app/requirements.txt)
-[![Streamlit](https://img.shields.io/badge/streamlit-1.28-red.svg)](streamlit_app/)
+[![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](gradio_app/requirements.txt)
+[![Gradio](https://img.shields.io/badge/gradio-4.0-orange.svg)](gradio_app/)
 
 ---
 
-## ✨ 最新更新 (v0.6.0) - 优化版本
+## ✨ 最新更新 (v0.7.0) - Gradio 框架迁移
 
-### 🔧 **项目优化**
-- ✅ 修复 streamlit_app 引用 ame 项目的 import 错误
-- ✅ 删除后端相关的冗余文件，项目纯 Streamlit 化
-- ✅ 集成 Logo 图片到侧边栏，提升品牌辨识度
-- ✅ Docker 启动支持交互式配置（端口、数据目录）
-- ✅ 数据持久化支持（知识库和 MEM 存储）
-- ✅ 文档精简，只保留 README.md 和 DOCUMENTATION.md
+### 🎨 **前端框架升级**
+- ❌ ~~Streamlit~~ → ✅ **Gradio 4.0** (更适合 AI 应用)
+- 更优雅的组件设计，更强大的自定义能力
+- 原生支持流式输出，对话体验更流畅
+- 更好的移动端适配
 
-### 🌊 **流式输出修复**
-- 修复 LLM 流式输出支持，实现真正的实时对话
-- MEM 对话页面流畅体验
+### 🛠️ **功能完善**
+- ✅ 完整的主页和系统状态展示
+- ✅ 配置页面：API Key 设置和测试
+- ✅ MEM 对话：实时流式输出，支持学习
+- ✅ Logo 集成，品牌形象更统一
+
+### 💡 **为什么选择 Gradio？**
+- 🚀 专为 AI/ML 应用设计
+- 🌊 原生流式输出支持
+- 🎨 丰富的组件库
+- 📱 更好的移动端体验
+- 🌐 内置分享功能
 
 ---
 
@@ -77,44 +84,40 @@ another-me/
 │   ├── vector_store/     # 向量存储
 │   ├── llm_caller/       # LLM 调用
 │   └── retrieval/        # 复杂检索
-├── streamlit_app/        # Streamlit 前端应用
-│   ├── pages/            # 页面模块
-│   │   ├── home_page.py         # 主页
-│   │   ├── config_page.py       # 配置页面
-│   │   ├── rag_page.py          # RAG 知识库
-│   │   ├── knowledge_manager_page.py  # 知识库管理
-│   │   ├── mem_page.py          # MEM 对话
-│   │   ├── memory_manager_page.py     # 记忆管理
-│   │   └── analysis_page.py     # 分析报告
+├── gradio_app/           # Gradio 前端应用
+│   ├── components/       # 页面组件
+│   │   ├── home_tab.py        # 主页
+│   │   ├── config_tab.py      # 配置页面
+│   │   └── mem_tab.py         # MEM 对话
 │   ├── utils/            # 工具模块
 │   └── app.py            # 主应用
-├── docker-build-streamlit.sh
+├── docker-build-gradio.sh
 └── README.md
 ```
 
 **三层分离架构**：
-- **Streamlit UI**: Python 全栈前端，简洁高效
+- **Gradio UI**: Python 前端，专为 AI 应用设计
 - **AME RAG**: 知识库管理、文档检索
 - **AME MEM**: 记忆学习、风格模仿
 
 ## 🚀 快速开始
 
-### 方式 1：Streamlit 本地运行（推荐）
+### 方式 1：Gradio 本地运行（推荐）
 
 ```bash
-cd streamlit_app
+cd gradio_app
 ./run.sh
 
-# 访问: http://localhost:8501
+# 访问: http://localhost:7860
 ```
 
 ### 方式 2：Docker 部署
 
 ```bash
 # 一键构建和启动
-./docker-build-streamlit.sh
+./docker-build-gradio.sh
 
-# 访问: http://localhost:8501
+# 访问: http://localhost:7860
 ```
 
 ### 🔑 初次使用
@@ -138,8 +141,8 @@ cd streamlit_app
 
 ## 🛠️ 技术栈
 
-**前端**: Streamlit (Python 全栈)  
-**AME 引擎**: v0.6.0
+**前端**: Gradio 4.0 (专为 AI 应用设计)  
+**AME 引擎**: v0.7.0
 - 📚 **RAG 模块**: 知识库管理、文档检索、知识分析
 - 💬 **MEM 模块**: 记忆学习、风格模仿、记忆管理
 - 📊 数据处理 + 📦 向量存储 (Memu/ChromaDB)

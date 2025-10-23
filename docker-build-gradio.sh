@@ -1,16 +1,16 @@
 #!/bin/bash
 
-# Another Me - Docker 构建脚本 (Streamlit 版本)
+# Another Me - Docker 构建脚本 (Gradio 版本)
 # 使用独立构建方式，不依赖 docker-compose
 
 set -e
 
-echo "🌟 Another Me - Docker 构建与部署 (Streamlit 版本)"
+echo "🌟 Another Me - Docker 构建与部署 (Gradio 版本)"
 echo "===================================================="
 
 # 配置
 NETWORK_NAME="another-me-network"
-APP_IMAGE="another-me-streamlit:latest"
+APP_IMAGE="another-me-gradio:latest"
 APP_CONTAINER="another-me-app"
 
 # 颜色输出
@@ -25,8 +25,8 @@ echo "===================================================="
 
 # 端口配置
 echo ""
-read -p "请输入 Streamlit 端口 [默认: 8501]: " STREAMLIT_PORT
-STREAMLIT_PORT=${STREAMLIT_PORT:-8501}
+read -p "请输入 Gradio 端口 [默认: 7860]: " GRADIO_PORT
+GRADIO_PORT=${GRADIO_PORT:-7860}
 
 # 数据持久化目录配置
 echo ""
@@ -43,7 +43,7 @@ fi
 echo ""
 echo -e "${GREEN}✅ 配置总结${NC}"
 echo "===================================================="
-echo "Streamlit 端口: $STREAMLIT_PORT"
+echo "Gradio 端口: $GRADIO_PORT"
 echo "数据目录: $DATA_DIR"
 echo "===================================================="
 echo ""
@@ -70,10 +70,10 @@ fi
 echo -e "${GREEN}🌐 创建 Docker 网络...${NC}"
 docker network create ${NETWORK_NAME} 2>/dev/null || echo "网络已存在"
 
-# 构建 Streamlit 应用镜像
-echo -e "${GREEN}🔨 构建 Streamlit 应用镜像...${NC}"
+# 构建 Gradio 应用镜像
+echo -e "${GREEN}🔨 构建 Gradio 应用镜像...${NC}"
 docker build -t ${APP_IMAGE} \
-    -f streamlit_app/Dockerfile \
+    -f gradio_app/Dockerfile \
     .
 
 # 停止并删除旧容器
@@ -81,14 +81,15 @@ echo -e "${GREEN}🧹 清理旧容器...${NC}"
 docker stop ${APP_CONTAINER} 2>/dev/null || true
 docker rm ${APP_CONTAINER} 2>/dev/null || true
 
-# 启动 Streamlit 应用容器
-echo -e "${GREEN}🚀 启动 Streamlit 应用容器...${NC}"
+# 启动 Gradio 应用容器
+echo -e "${GREEN}🚀 启动 Gradio 应用容器...${NC}"
 docker run -d \
     --name ${APP_CONTAINER} \
     --network ${NETWORK_NAME} \
-    -p ${STREAMLIT_PORT}:8501 \
+    -p ${GRADIO_PORT}:7860 \
     -v "$(pwd)/${DATA_DIR}:/app/data" \
     -v "$(pwd)/ame:/app/ame" \
+    -v "$(pwd)/another me logo.jpg:/app/another me logo.jpg" \
     --env-file .env \
     --restart unless-stopped \
     ${APP_IMAGE}
@@ -96,7 +97,7 @@ docker run -d \
 echo ""
 echo -e "${GREEN}✅ Another Me 已成功启动！${NC}"
 echo "===================================================="
-echo -e "📍 Streamlit 应用: ${GREEN}http://localhost:${STREAMLIT_PORT}${NC}"
+echo -e "📍 Gradio 应用: ${GREEN}http://localhost:${GRADIO_PORT}${NC}"
 echo ""
 echo "💡 提示："
 echo "  - API Key 可以在应用的配置页面设置"
