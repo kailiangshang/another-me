@@ -45,63 +45,94 @@ def get_statistics():
         return 0, 0, "⚠️ 未初始化"
 
 
-def chat_response(message, history, temperature):
+def chat_response(message, history):
     """生成对话响应（流式）"""
     state = get_session_state()
     
     if not state.get('is_configured'):
-        yield "⚠️ 请先在配置页面设置 API Key"
-        return
+        gr.Warning("⚠️ 请先在配置页面设置 API Key")
+        return history
     
-    if not message.strip():
-        yield "请输入消息..."
-        return
+    if not message or not message.strip():
+        return history
     
     try:
         engine = init_mimic_engine()
         
-        # 流式生成
-        full_response = ""
+        # 添加用户消息
+        history = history + [{"role": "user", "content": message}]
         
-        async def generate():
-            nonlocal full_response
+        # 流式生成助手回复
+        assistant_message = ""
+        
+        # 定义异步生成器
+        async def async_generate():
+            nonlocal assistant_message
             async for chunk in engine.generate_response_stream(
                 prompt=message,
-                temperature=temperature,
+                temperature=0.8,
                 use_history=True
             ):
-                full_response += chunk
-                yield full_response
+                assistant_message += chunk
+                # 更新历史记录，显示当前生成的内容
+                current_history = history + [{"role": "assistant", "content": assistant_message}]
+                yield current_history
         
         # 运行异步生成器
-        for response in asyncio.run(generate()):
-            yield response
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
+        final_history = history
+        try:
+            gen = async_generate()
+            while True:
+                try:
+                    current_history = loop.run_until_complete(gen.__anext__())
+                    final_history = current_history
+                    yield current_history
+                except StopAsyncIteration:
+                    break
+        finally:
+            loop.close()
         
         # 学习这次对话
-        asyncio.run(engine.learn_from_conversation(
-            user_message=message,
-            context=full_response
-        ))
+        if assistant_message:
+            asyncio.run(engine.learn_from_conversation(
+                user_message=message,
+                context=assistant_message
+            ))
+        
+        return final_history
         
     except Exception as e:
-        yield f"❌ 生成失败: {str(e)}"
+        import traceback
+        traceback.print_exc()
+        gr.Error(f"生成失败: {str(e)}")
+        return history
 
 
-def upload_and_learn(file, progress=gr.Progress()):
+def upload_and_learn(file):
     """上传并学习聊天记录"""
     state = get_session_state()
     
     if not state.get('is_configured'):
-        return "⚠️ 请先在配置页面设置 API Key"
+        gr.Warning("⚠️ 请先在配置页面设置 API Key")
+        return "⚠️ 请先配置 API Key", None
     
     if file is None:
-        return "请先上传文件"
+        gr.Warning("请先上传文件")
+        return "请先上传文件", None
     
     try:
         engine = init_mimic_engine()
         
         # 读取文件内容
-        with open(file.name, 'r', encoding='utf-8') as f:
+        if hasattr(file, 'name'):
+            file_path = file.name
+        else:
+            file_path = file
+        
+        with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
         
         # 按行分割
@@ -109,17 +140,18 @@ def upload_and_learn(file, progress=gr.Progress()):
         messages = [line.strip() for line in lines if line.strip()]
         
         # 学习每条消息
-        for i, msg in enumerate(messages):
-            progress((i + 1) / len(messages), desc=f"学习中 {i+1}/{len(messages)}")
+        for msg in messages:
             asyncio.run(engine.learn_from_conversation(
                 user_message=msg,
                 metadata={"source": "uploaded_chat"}
             ))
         
-        return f"✅ 已学习 {len(messages)} 条消息！"
+        gr.Info(f"✅ 已学习 {len(messages)} 条消息！")
+        return f"✅ 已学习 {len(messages)} 条消息！", None  # 清空文件输入
     
     except Exception as e:
-        return f"❌ 学习失败: {str(e)}"
+        gr.Error(f"学习失败: {str(e)}")
+        return f"❌ 学习失败: {str(e)}", None
 
 
 def create_mem_tab():
@@ -157,41 +189,42 @@ def create_mem_tab():
             chatbot = gr.Chatbot(
                 label="AI 分身对话",
                 height=500,
-                avatar_images=(None, "🤖"),
-                bubble_full_width=False
+                type="messages",
+                avatar_images=(None, "🤖")
             )
             
-            with gr.Row():
-                with gr.Column(scale=4):
-                    msg_input = gr.Textbox(
-                        placeholder="输入消息...",
-                        show_label=False,
-                        container=False
-                    )
-                with gr.Column(scale=1):
-                    temperature_slider = gr.Slider(
-                        minimum=0.0,
-                        maximum=2.0,
-                        value=0.8,
-                        step=0.1,
-                        label="温度",
-                        info="控制回复的随机性"
-                    )
+            msg_input = gr.Textbox(
+                placeholder="输入消息...",
+                show_label=False,
+                container=False
+            )
             
             with gr.Row():
                 send_btn = gr.Button("📤 发送", variant="primary")
                 clear_btn = gr.Button("🗑️ 清空对话")
             
-            # 绑定事件
+            # 绑定事件 - 添加清空输入框
+            def submit_and_clear(message, history):
+                # 返回空字符串清空输入框
+                return "", history
+            
             msg_input.submit(
+                fn=submit_and_clear,
+                inputs=[msg_input, chatbot],
+                outputs=[msg_input, chatbot],
+            ).then(
                 fn=chat_response,
-                inputs=[msg_input, chatbot, temperature_slider],
+                inputs=[msg_input, chatbot],
                 outputs=[chatbot],
             )
             
             send_btn.click(
+                fn=submit_and_clear,
+                inputs=[msg_input, chatbot],
+                outputs=[msg_input, chatbot],
+            ).then(
                 fn=chat_response,
-                inputs=[msg_input, chatbot, temperature_slider],
+                inputs=[msg_input, chatbot],
                 outputs=[chatbot],
             )
             
@@ -227,7 +260,7 @@ def create_mem_tab():
             upload_btn.click(
                 fn=upload_and_learn,
                 inputs=[file_upload],
-                outputs=[upload_status]
+                outputs=[upload_status, file_upload]  # 清空文件输入
             )
             
             gr.Markdown("---")
@@ -245,7 +278,8 @@ def create_mem_tab():
             
             def learn_manual(text):
                 if not text.strip():
-                    return "请输入内容"
+                    gr.Warning("请输入内容")
+                    return "请输入内容", text
                 
                 try:
                     engine = init_mimic_engine()
@@ -253,14 +287,16 @@ def create_mem_tab():
                         user_message=text,
                         metadata={"source": "manual_input"}
                     ))
-                    return "✅ 已学习！"
+                    gr.Info("✅ 已学习！")
+                    return "✅ 已学习！", ""  # 清空输入框
                 except Exception as e:
-                    return f"❌ 失败: {str(e)}"
+                    gr.Error(f"失败: {str(e)}")
+                    return f"❌ 失败: {str(e)}", text
             
             manual_btn.click(
                 fn=learn_manual,
                 inputs=[manual_text],
-                outputs=[manual_status]
+                outputs=[manual_status, manual_text]  # 清空文本输入
             )
     
     # 加载时刷新统计

@@ -82,25 +82,25 @@ def create_app():
         # 创建标签页
         with gr.Tabs(elem_classes=["tab-nav"]) as tabs:
             
+            # MEM 对话（首页）
+            with gr.TabItem("💬 对话", id=0):
+                create_mem_tab()
+            
             # 主页
-            with gr.TabItem("🏠 主页", id=0):
+            with gr.TabItem("🏠 主页", id=1):
                 create_home_tab()
             
             # 配置
-            with gr.TabItem("⚙️ 配置", id=1):
+            with gr.TabItem("⚙️ 配置", id=2):
                 create_config_tab()
             
             # RAG 知识库
-            with gr.TabItem("📚 RAG 知识库", id=2):
+            with gr.TabItem("📚 RAG 知识库", id=3):
                 create_rag_tab()
             
             # 知识库管理
-            with gr.TabItem("📂 知识库管理", id=3):
+            with gr.TabItem("📂 知识库管理", id=4):
                 create_knowledge_manager_tab()
-            
-            # MEM 对话
-            with gr.TabItem("💬 MEM 对话", id=4):
-                create_mem_tab()
             
             # 记忆管理
             with gr.TabItem("🧠 记忆管理", id=5):
