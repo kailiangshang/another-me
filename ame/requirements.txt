@@ -1,7 +1,7 @@
 # AME - Another Me Engine Dependencies
 
 # Core dependencies
-numpy>=1.24.0
+numpy>=1.24.0,<2.0.0
 openai>=1.0.0
 
 # Optional dependencies
@@ -11,3 +11,6 @@ python-magic>=0.4.27  # For file type detection
 
 # Performance optimization
 psutil>=5.9.0  # For performance monitoring
+
+# Logging
+coloredlogs>=15.0  # For colored logging output

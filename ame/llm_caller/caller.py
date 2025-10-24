@@ -1,16 +1,19 @@
 """
 LLM 调用模块
-负责：与 OpenAI Compatible API 交互
-优化：重试机制、流式输出、缓存、错误处理
+负责:与 OpenAI Compatible API 交互
+优化:重试机制、流式输出、缓存、错误处理
 """
 
-from openai import OpenAI
+from openai import OpenAI, AsyncOpenAI
 import os
-from typing import List, Dict, Optional, AsyncIterator
-import time
+from typing import List, Dict, Optional, AsyncIterator, Any
+import asyncio
 import hashlib
 import json
 from functools import lru_cache
+import logging
+
+logger = logging.getLogger(__name__)
 
 # 默认配置
 DEFAULT_CONFIG = {
@@ -31,7 +34,15 @@ class LLMCaller:
     - 错误处理
     """
     
-    def __init__(self, api_key: str = None, base_url: str = None, model: str = None, max_retries: int = 3, cache_enabled: bool = True):
+    def __init__(
+        self, 
+        api_key: Optional[str] = None, 
+        base_url: Optional[str] = None, 
+        model: Optional[str] = None, 
+        max_retries: int = 3, 
+        cache_enabled: bool = True,
+        timeout: float = 60.0
+    ):
         """
         初始化 LLM 调用器
         
@@ -41,22 +52,33 @@ class LLMCaller:
             model: 默认模型
             max_retries: 最大重试次数
             cache_enabled: 是否启用缓存
+            timeout: 请求超时时间（秒）
         """
         self.api_key = api_key or os.getenv("OPENAI_API_KEY", DEFAULT_CONFIG["OPENAI_API_KEY"])
         self.base_url = base_url or os.getenv("OPENAI_BASE_URL", DEFAULT_CONFIG["OPENAI_BASE_URL"])
         self.model = model or os.getenv("OPENAI_MODEL", DEFAULT_CONFIG["OPENAI_MODEL"])
-        self.client = None
+        self.client: Optional[OpenAI] = None
+        self.async_client: Optional[AsyncOpenAI] = None
         self.max_retries = max_retries
         self.cache_enabled = cache_enabled
-        self._cache = {}
+        self.timeout = timeout
+        self._cache: Dict[str, Any] = {}
         self._init_client()
     
-    def _init_client(self):
-        """初始化 OpenAI 客户端"""
+    def _init_client(self) -> None:
+        """初始化 OpenAI 客户端（同步和异步）"""
         if self.api_key:
             self.client = OpenAI(
                 api_key=self.api_key,
-                base_url=self.base_url
+                base_url=self.base_url,
+                timeout=self.timeout,
+                max_retries=0  # 手动处理重试
+            )
+            self.async_client = AsyncOpenAI(
+                api_key=self.api_key,
+                base_url=self.base_url,
+                timeout=self.timeout,
+                max_retries=0
             )
     
     def _get_cache_key(self, messages: List[Dict], model: str, temperature: float) -> str:
@@ -87,9 +109,9 @@ class LLMCaller:
         temperature: float = 0.7,
         max_tokens: Optional[int] = None,
         stream: bool = False
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         """
-        生成文本
+        异步生成文本
         
         Args:
             messages: 消息列表
@@ -100,27 +122,33 @@ class LLMCaller:
             
         Returns:
             生成结果
+            
+        Raises:
+            ValueError: API未配置
+            Exception: 生成失败
         """
-        if not self.client:
+        if not self.async_client:
             self._init_client()
         
-        if not self.client:
+        if not self.async_client:
             raise ValueError("OpenAI API key not configured")
         
         if not model:
             model = self.model
         
-        # 检查缓存
-        cache_key = self._get_cache_key(messages, model, temperature)
-        cached_response = self._get_from_cache(cache_key)
-        if cached_response:
-            return cached_response
+        # 检查缓存（仅非流式）
+        if not stream:
+            cache_key = self._get_cache_key(messages, model, temperature)
+            cached_response = self._get_from_cache(cache_key)
+            if cached_response:
+                logger.debug(f"Cache hit for query")
+                return cached_response
         
         # 重试机制
-        last_error = None
+        last_error: Optional[Exception] = None
         for attempt in range(self.max_retries):
             try:
-                response = self.client.chat.completions.create(
+                response = await self.async_client.chat.completions.create(
                     model=model,
                     messages=messages,
                     temperature=temperature,
@@ -144,15 +172,17 @@ class LLMCaller:
                 
                 # 保存到缓存
                 self._save_to_cache(cache_key, result)
+                logger.info(f"Generated response with {result['usage']['total_tokens']} tokens")
                 
                 return result
             
             except Exception as e:
                 last_error = e
+                logger.warning(f"Generation attempt {attempt + 1} failed: {str(e)}")
                 if attempt < self.max_retries - 1:
                     # 指数退避
                     wait_time = (2 ** attempt) * 0.5
-                    time.sleep(wait_time)
+                    await asyncio.sleep(wait_time)
                     continue
         
         raise Exception(f"LLM generation failed after {self.max_retries} attempts: {str(last_error)}")
@@ -182,7 +212,7 @@ class LLMCaller:
         max_tokens: Optional[int] = None
     ) -> AsyncIterator[str]:
         """
-        流式生成文本
+        异步流式生成文本
         
         Args:
             messages: 消息列表
@@ -192,21 +222,25 @@ class LLMCaller:
             
         Yields:
             生成的文本片段
+            
+        Raises:
+            ValueError: API未配置
+            Exception: 生成失败
         """
-        if not self.client:
+        if not self.async_client:
             self._init_client()
         
-        if not self.client:
+        if not self.async_client:
             raise ValueError("OpenAI API key not configured")
         
         if not model:
             model = self.model
         
         # 重试机制
-        last_error = None
+        last_error: Optional[Exception] = None
         for attempt in range(self.max_retries):
             try:
-                response = self.client.chat.completions.create(
+                response = await self.async_client.chat.completions.create(
                     model=model,
                     messages=messages,
                     temperature=temperature,
@@ -214,17 +248,19 @@ class LLMCaller:
                     stream=True
                 )
                 
-                for chunk in response:
+                async for chunk in response:
                     if chunk.choices[0].delta.content:
                         yield chunk.choices[0].delta.content
                 
+                logger.info("Stream generation completed")
                 return
             
             except Exception as e:
                 last_error = e
+                logger.warning(f"Stream generation attempt {attempt + 1} failed: {str(e)}")
                 if attempt < self.max_retries - 1:
                     wait_time = (2 ** attempt) * 0.5
-                    time.sleep(wait_time)
+                    await asyncio.sleep(wait_time)
                     continue
         
-        raise Exception(f"LLM generation failed after {self.max_retries} attempts: {str(last_error)}")
+        raise Exception(f"LLM stream generation failed after {self.max_retries} attempts: {str(last_error)}")
