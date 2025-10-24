@@ -49,17 +49,29 @@ def create_config_tab():
     
     state = get_session_state()
     
-    gr.Markdown(
-        """
-        ## ⚙️ 系统配置
-        
-        配置 OpenAI 兼容的 API 以开始使用。支持 OpenAI、Azure OpenAI、本地模型（Ollama）等。
-        """
-    )
+    with gr.Column():
+        gr.HTML(
+            """
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        padding: 30px; border-radius: 15px; text-align: center; color: white;
+                        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3); margin-bottom: 30px;">
+                <h2 style="font-size: 1.8em; margin-bottom: 10px;">⚙️ 系统配置</h2>
+                <p style="opacity: 0.95;">配置 OpenAI 兼容的 API 以开始使用。支持 OpenAI、Azure OpenAI、本地模型（Ollama）等。</p>
+            </div>
+            """
+        )
     
     with gr.Row():
         with gr.Column(scale=2):
-            gr.Markdown("### 🔑 API 配置")
+            gr.HTML(
+                """
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;
+                            border-left: 4px solid #667eea; margin-bottom: 20px;">
+                    <h3 style="color: #667eea; margin-bottom: 10px;">🔑 API 配置</h3>
+                    <p style="color: #666; font-size: 0.95em;">请填写你的 API 信息，数据将安全存储在本地</p>
+                </div>
+                """
+            )
             
             api_key_input = gr.Textbox(
                 label="API Key",
@@ -107,26 +119,41 @@ def create_config_tab():
             )
         
         with gr.Column(scale=1):
-            gr.Markdown("### 💾 数据存储")
-            
-            gr.Markdown(
+            gr.HTML(
                 """
-                - 📁 数据目录: `/app/data/`
-                - 📦 RAG 向量库: `/app/data/rag_vector_store/`
-                - 💬 MEM 向量库: `/app/data/mem_vector_store/`
-                - ⚙️ 配置文件: `/app/data/runtime_config.json`
+                <div style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+                            padding: 20px; border-radius: 15px; margin-bottom: 20px;
+                            box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <h3 style="color: #333; margin-bottom: 15px; text-align: center;">💾 数据存储</h3>
+                    <div style="background: white; padding: 15px; border-radius: 10px; font-size: 0.9em; color: #555;">
+                        <p style="margin: 8px 0;"><strong>📁 数据目录</strong></p>
+                        <p style="margin: 5px 0; padding-left: 15px; color: #667eea;">/app/data/</p>
+                        <p style="margin: 8px 0; margin-top: 15px;"><strong>📦 RAG 向量库</strong></p>
+                        <p style="margin: 5px 0; padding-left: 15px; color: #667eea;">/app/data/rag_vector_store/</p>
+                        <p style="margin: 8px 0; margin-top: 15px;"><strong>💬 MEM 向量库</strong></p>
+                        <p style="margin: 5px 0; padding-left: 15px; color: #667eea;">/app/data/mem_vector_store/</p>
+                        <p style="margin: 8px 0; margin-top: 15px;"><strong>⚙️ 配置文件</strong></p>
+                        <p style="margin: 5px 0; padding-left: 15px; color: #667eea;">/app/data/runtime_config.json</p>
+                    </div>
+                </div>
                 """
             )
             
-            gr.Markdown("### ℹ️ 系统信息")
-            
             status_label = "✅ 已配置" if state.get('is_configured') else "⚠️ 未配置"
+            status_color = "#27ae60" if state.get('is_configured') else "#e74c3c"
             
-            gr.Markdown(
+            gr.HTML(
                 f"""
-                - **版本**: v0.7.0
-                - **AME 引擎**: v0.7.0
-                - **前端框架**: Gradio
-                - **状态**: {status_label}
+                <div style="background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+                            padding: 20px; border-radius: 15px;
+                            box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <h3 style="color: #333; margin-bottom: 15px; text-align: center;">ℹ️ 系统信息</h3>
+                    <div style="background: white; padding: 15px; border-radius: 10px; font-size: 0.9em; color: #555;">
+                        <p style="margin: 8px 0;"><strong>💻 版本</strong>: v0.7.0</p>
+                        <p style="margin: 8px 0;"><strong>🔧 AME 引擎</strong>: v0.7.0</p>
+                        <p style="margin: 8px 0;"><strong>🌐 前端框架</strong>: Gradio 4.0</p>
+                        <p style="margin: 8px 0;"><strong>🟢 状态</strong>: <span style="color: {status_color}; font-weight: 600;">{status_label}</span></p>
+                    </div>
+                </div>
                 """
             )

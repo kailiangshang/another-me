@@ -157,27 +157,73 @@ def upload_and_learn(file):
 def create_mem_tab():
     """创建 MEM 对话页面"""
     
-    gr.Markdown(
+    with gr.Column():
+        gr.HTML(
+            """
+            <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                        padding: 30px; border-radius: 15px; text-align: center; color: white;
+                        box-shadow: 0 8px 20px rgba(240, 147, 251, 0.3); margin-bottom: 25px;">
+                <h2 style="font-size: 1.8em; margin-bottom: 10px;">💬 MEM 对话</h2>
+                <p style="opacity: 0.95;">与 AI 分身对话，它会模仿你的说话风格。上传聊天记录让它学习，对话会被记录以持续改进。</p>
+            </div>
+            """
+        )
+    
+    # 统计信息卡片
+    gr.HTML(
         """
-        ## 💬 MEM 对话
-        
-        与 AI 分身对话，它会模仿你的说话风格。上传聊天记录让它学习，对话会被记录以持续改进。
+        <div style="text-align: center; margin-bottom: 15px;">
+            <h3 style="color: #667eea;">📊 记忆统计</h3>
+        </div>
         """
     )
     
-    # 统计信息卡片
     with gr.Row():
-        memory_count = gr.Number(label="💬 总记忆数", value=0, interactive=False)
-        source_count = gr.Number(label="🏷️ 来源类型", value=0, interactive=False)
-        status_text = gr.Textbox(label="📊 状态", value="", interactive=False)
-        refresh_btn = gr.Button("🔄 刷新统计", size="sm")
+        with gr.Column(scale=1):
+            gr.HTML(
+                """
+                <div style="text-align: center; padding: 15px; background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+                            border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                    <div style="font-size: 2em; margin-bottom: 5px;">💬</div>
+                    <div style="font-weight: 600; color: #333;">总记忆数</div>
+                </div>
+                """
+            )
+            memory_count = gr.Number(label="", value=0, interactive=False, container=False)
+        
+        with gr.Column(scale=1):
+            gr.HTML(
+                """
+                <div style="text-align: center; padding: 15px; background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+                            border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                    <div style="font-size: 2em; margin-bottom: 5px;">🏷️</div>
+                    <div style="font-weight: 600; color: #333;">来源类型</div>
+                </div>
+                """
+            )
+            source_count = gr.Number(label="", value=0, interactive=False, container=False)
+        
+        with gr.Column(scale=1):
+            gr.HTML(
+                """
+                <div style="text-align: center; padding: 15px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                            border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                    <div style="font-size: 2em; margin-bottom: 5px; color: white;">🟢</div>
+                    <div style="font-weight: 600; color: white;">系统状态</div>
+                </div>
+                """
+            )
+            status_text = gr.Textbox(label="", value="", interactive=False, container=False)
+    
+    with gr.Row():
+        refresh_btn = gr.Button("🔄 刷新统计", variant="primary", size="sm")
     
     refresh_btn.click(
         fn=get_statistics,
         outputs=[memory_count, source_count, status_text]
     )
     
-    gr.Markdown("---")
+    gr.HTML("<div style='margin: 25px 0; border-top: 2px solid #e0e0e0;'></div>")
     
     # 主要内容区域
     with gr.Tabs():
@@ -236,15 +282,18 @@ def create_mem_tab():
         # 学习材料标签页
         with gr.TabItem("📚 学习材料"):
             
-            gr.Markdown(
+            gr.HTML(
                 """
-                ### 上传聊天记录
-                
-                上传你的聊天记录文本文件，让 AI 学习你的说话风格。
-                
-                **支持格式**：
-                - 纯文本（每行一条消息）
-                - JSON 格式的聊天记录
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;
+                            border-left: 4px solid #667eea;">
+                    <h3 style="color: #667eea; margin-bottom: 10px;">📚 上传聊天记录</h3>
+                    <p style="color: #666; line-height: 1.6;">
+                        上传你的聊天记录文本文件，让 AI 学习你的说话风格。
+                    </p>
+                    <p style="color: #667eea; margin-top: 10px; font-weight: 600;">
+                        • 支持格式：纯文本（每行一条消息）、JSON 格式的聊天记录
+                    </p>
+                </div>
                 """
             )
             
@@ -263,9 +312,17 @@ def create_mem_tab():
                 outputs=[upload_status, file_upload]  # 清空文件输入
             )
             
-            gr.Markdown("---")
+            gr.HTML("<div style='margin: 20px 0; border-top: 1px solid #e0e0e0;'></div>")
             
-            gr.Markdown("### ✍️ 手动输入")
+            gr.HTML(
+                """
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;
+                            border-left: 4px solid #f5576c;">
+                    <h3 style="color: #f5576c; margin-bottom: 10px;">✍️ 手动输入</h3>
+                    <p style="color: #666;">直接输入你的聊天记录、日记或想法，让 AI 学习</p>
+                </div>
+                """
+            )
             
             manual_text = gr.Textbox(
                 label="输入一段你说过的话",
