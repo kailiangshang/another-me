@@ -8,7 +8,10 @@ import json
 from typing import List, Dict, Optional
 from datetime import datetime
 import numpy as np
+import logging
 from .base import VectorStoreBase
+
+logger = logging.getLogger(__name__)
 
 
 class MemuVectorStore(VectorStoreBase):
@@ -19,16 +22,18 @@ class MemuVectorStore(VectorStoreBase):
     这里提供一个简化的实现，实际使用时需要安装 memu 库
     """
     
-    def __init__(self, db_path: str, embedding_dim: int = 1536):
+    def __init__(self, db_path: str, embedding_dim: int = 1536, use_openai_embedding: bool = False):
         """
         初始化 Memu 向量存储
         
         Args:
             db_path: 数据库路径
             embedding_dim: 向量维度
+            use_openai_embedding: 是否使用OpenAI Embedding API
         """
         self.db_path = db_path
         self.embedding_dim = embedding_dim
+        self.use_openai_embedding = use_openai_embedding
         os.makedirs(db_path, exist_ok=True)
         
         # 数据存储文件
@@ -37,36 +42,93 @@ class MemuVectorStore(VectorStoreBase):
         
         # 加载或初始化数据
         self._load_data()
+        
+        # OpenAI客户端（延迟初始化）
+        self._openai_client = None
     
-    def _load_data(self):
+    def _load_data(self) -> None:
         """加载数据"""
         if os.path.exists(self.data_file):
-            with open(self.data_file, 'r', encoding='utf-8') as f:
-                self.documents = json.load(f)
+            try:
+                with open(self.data_file, 'r', encoding='utf-8') as f:
+                    self.documents = json.load(f)
+                logger.info(f"Loaded {len(self.documents)} documents")
+            except Exception as e:
+                logger.error(f"Failed to load documents: {e}")
+                self.documents = []
         else:
             self.documents = []
         
         if os.path.exists(self.index_file):
-            self.embeddings = np.load(self.index_file)
+            try:
+                self.embeddings = np.load(self.index_file)
+                logger.info(f"Loaded {len(self.embeddings)} embeddings")
+            except Exception as e:
+                logger.error(f"Failed to load embeddings: {e}")
+                self.embeddings = np.array([]).reshape(0, self.embedding_dim)
         else:
             self.embeddings = np.array([]).reshape(0, self.embedding_dim)
     
-    def _save_data(self):
+    def _save_data(self) -> None:
         """保存数据"""
-        with open(self.data_file, 'w', encoding='utf-8') as f:
-            json.dump(self.documents, f, ensure_ascii=False, indent=2)
-        
-        if len(self.embeddings) > 0:
-            np.save(self.index_file, self.embeddings)
+        try:
+            with open(self.data_file, 'w', encoding='utf-8') as f:
+                json.dump(self.documents, f, ensure_ascii=False, indent=2)
+            
+            if len(self.embeddings) > 0:
+                np.save(self.index_file, self.embeddings)
+            
+            logger.debug(f"Saved {len(self.documents)} documents")
+        except Exception as e:
+            logger.error(f"Failed to save data: {e}")
+            raise
     
     def _generate_embedding(self, text: str) -> np.ndarray:
         """
         生成文本向量
         
-        注意: 这里使用简单的哈希方法作为示例
-        实际应该调用 OpenAI Embedding API 或本地模型
+        Args:
+            text: 输入文本
+            
+        Returns:
+            文本向量
         """
-        # 简单的文本哈希向量化（仅用于演示）
+        if self.use_openai_embedding:
+            return self._generate_openai_embedding(text)
+        else:
+            return self._generate_hash_embedding(text)
+    
+    def _generate_openai_embedding(self, text: str) -> np.ndarray:
+        """使用OpenAI API生成嵌入向量"""
+        if self._openai_client is None:
+            try:
+                from openai import OpenAI
+                self._openai_client = OpenAI(
+                    api_key=os.getenv("OPENAI_API_KEY"),
+                    base_url=os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+                )
+            except Exception as e:
+                logger.error(f"Failed to initialize OpenAI client: {e}")
+                return self._generate_hash_embedding(text)
+        
+        try:
+            response = self._openai_client.embeddings.create(
+                model="text-embedding-ada-002",
+                input=text
+            )
+            embedding = np.array(response.data[0].embedding, dtype=np.float32)
+            return embedding
+        except Exception as e:
+            logger.warning(f"OpenAI embedding failed, using hash: {e}")
+            return self._generate_hash_embedding(text)
+    
+    def _generate_hash_embedding(self, text: str) -> np.ndarray:
+        """
+        使用哈希方法生成向量（fallback）
+        
+        注意: 这是一个简单的fallback方案，仅用于测试
+        生产环境应使用真实的embedding模型
+        """
         import hashlib
         hash_obj = hashlib.sha256(text.encode())
         hash_bytes = hash_obj.digest()

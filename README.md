@@ -4,42 +4,34 @@
 
 > 用你的聊天记录、日记、知识训练出一个"像你"的 AI。数据本地存储，隐私安全。
 
-[![Version](https://img.shields.io/badge/version-0.7.0-blue.svg)](DOCUMENTATION.md#版本历史)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](DOCUMENTATION.md)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](gradio_app/requirements.txt)
-[![Gradio](https://img.shields.io/badge/gradio-4.0-orange.svg)](gradio_app/)
+[![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](backend/requirements.txt)
+[![React](https://img.shields.io/badge/react-18.0+-blue.svg)](frontend/package.json)
+[![FastAPI](https://img.shields.io/badge/fastapi-0.104+-green.svg)](backend/requirements.txt)
 
 ---
 
-## ✨ 最新更新 (v0.7.0) - Gradio 框架迁移
+## ✨ 最新更新 (v1.0.0) - 架构优化版
 
-### 🎨 **前端框架升级**
-- ❌ ~~Streamlit~~ → ✅ **Gradio 4.0** (更适合 AI 应用)
-- 更优雅的组件设计，更强大的自定义能力
-- 原生支持流式输出，对话体验更流畅
-- 更好的移动端适配
+### 🚀 **架构升级**
+- ✅ **统一架构**: React + FastAPI，移除 Gradio 依赖
+- ✅ **现代前端**: TypeScript + Vite + Zustand 状态管理
+- ✅ **一键启动**: 全新的 start.sh 和 stop.sh 脚本
+- ✅ **Docker 优化**: 简化的容器化部署方案
 
-### 🛠️ **功能完善**
-- ✅ 完整的主页和系统状态展示
-- ✅ 配置页面：API Key 设置和测试
-- ✅ MEM 对话：实时流式输出，支持学习
-- ✅ Logo 集成，品牌形象更统一
+### 🔧 **功能增强**
+- ✅ **RAG 完整实现**: 文档上传、知识检索、智能问答
+- ✅ **真实 Embedding**: 集成 OpenAI Embedding API
+- ✅ **流式输出**: 实时对话响应
+- ✅ **状态持久化**: 聊天记录本地保存
 
-### 💡 **为什么选择 Gradio？**
-- 🚀 专为 AI/ML 应用设计
-- 🌊 原生流式输出支持
-- 🎨 丰富的组件库
-- 📱 更好的移动端体验
-- 🌐 内置分享功能
+### 📚 **代码质量**
+- ✅ **TypeScript**: 完整的类型安全
+- ✅ **模块化**: 前后端分离，清晰的代码组织
+- ✅ **可扩展**: AME 引擎独立，易于扩展
 
----
-
-## 🎯 核心理念
-
-**业务功能驱动，技术模块支撑**
-
-- 🔹 **业务功能**：面向用户价值，描述"能做什么"
-- 🔹 **技术功能**：面向系统实现，描述"如何做到"
+📄 **[完整文档](DOCUMENTATION.md)**
 
 ---
 
@@ -63,69 +55,93 @@
 - 🧠 记忆管理（查看、搜索、时间线）
 - 💾 记忆导出（JSON 格式）
 
-### 📊 分析报告
-生成自我认知分析报告。
-
-**功能**：
-- 📝 情绪分析
-- 🔑 关键词提取
-- 📄 导出 MD/HTML/PDF
-
 
 
 ## 🏗️ 项目架构
 
 ```
 another-me/
-├── ame/                  # AME - Another Me Engine（独立技术模块）
-│   ├── rag/              # RAG 模块：知识库管理
-│   ├── mem/              # MEM 模块：记忆与模仿
-│   ├── data_processor/   # 数据处理
-│   ├── vector_store/     # 向量存储
-│   ├── llm_caller/       # LLM 调用
-│   └── retrieval/        # 复杂检索
-├── gradio_app/           # Gradio 前端应用
-│   ├── components/       # 页面组件
-│   │   ├── home_tab.py        # 主页
-│   │   ├── config_tab.py      # 配置页面
-│   │   └── mem_tab.py         # MEM 对话
-│   ├── utils/            # 工具模块
-│   └── app.py            # 主应用
-├── docker-build-gradio.sh
+├── frontend/              # React 前端应用
+│   ├── src/
+│   │   ├── api/           # API 客户端
+│   │   ├── pages/         # 页面组件
+│   │   ├── store/         # Zustand 状态管理
+│   │   ├── types/         # TypeScript 类型
+│   │   └── App.tsx        # 主应用
+│   └── vite.config.ts   # Vite 配置
+├── backend/               # FastAPI 后端
+│   ├── app/
+│   │   ├── api/v1/        # API 端点
+│   │   ├── core/          # 核心配置
+│   │   ├── middleware/    # 中间件
+│   │   ├── models/        # 数据模型
+│   │   ├── services/      # 业务逻辑
+│   │   └── main.py        # 应用入口
+│   └── requirements.txt
+├── ame/                   # AME 技术引擎（独立模块）
+│   ├── rag/               # RAG 模块：知识库管理
+│   ├── mem/               # MEM 模块：记忆与模仿
+│   ├── data_processor/    # 数据处理
+│   ├── vector_store/      # 向量存储
+│   ├── llm_caller/        # LLM 调用
+│   └── retrieval/         # 复杂检索
+├── deployment/            # Docker 部署
+│   ├── docker/
+│   │   ├── Dockerfile.backend
+│   │   ├── Dockerfile.frontend
+│   │   └── nginx.conf
+│   ├── docker-compose.yml
+│   └── deploy.sh
+├── start.sh               # 本地一键启动
+├── stop.sh                # 停止服务
 └── README.md
 ```
 
 **三层分离架构**：
-- **Gradio UI**: Python 前端，专为 AI 应用设计
-- **AME RAG**: 知识库管理、文档检索
-- **AME MEM**: 记忆学习、风格模仿
+- **React 前端**: TypeScript + Vite + Zustand，现代化的用户界面
+- **FastAPI 后端**: Python 3.11+，高性能 API 服务
+- **AME 引擎**: 独立的技术模块，支持 RAG 和 MEM 功能
 
 ## 🚀 快速开始
 
-### 方式 1：Gradio 本地运行（推荐）
+### 方式 1：本地开发运行（推荐）
 
 ```bash
-cd gradio_app
-./run.sh
+# 一键启动前后端服务
+./start.sh
 
-# 访问: http://localhost:7860
+# 访问:
+# - 前端: http://localhost:5173
+# - 后端API: http://localhost:8000
+# - API文档: http://localhost:8000/docs
+
+# 停止服务
+./stop.sh
 ```
+
+**功能特性**：
+- ✅ 自动检查环境 (Python 3.11+, Node.js 18+)
+- ✅ 自动安装依赖
+- ✅ 后台运行，日志文件记录
 
 ### 方式 2：Docker 部署
 
 ```bash
 # 一键构建和启动
-./docker-build-gradio.sh
+cd deployment
+./deploy.sh
 
-# 访问: http://localhost:7860
+# 访问:
+# - 前端: http://localhost
+# - 后端API: http://localhost:8000
 ```
 
 ### 🔑 初次使用
 
-1. 访问应用
-2. 点击侧边栏 **“⚙️ 配置”**
-3. 输入 OpenAI API Key
-4. 点击 **“💾 保存配置”**
+1. 访问应用 http://localhost:5173
+2. 点击 **"配置"** 页面
+3. 输入 OpenAI API Key 和相关配置
+4. 点击 **"保存配置"**
 5. 开始使用！
 
 ## 📖 完整文档
@@ -141,16 +157,21 @@ cd gradio_app
 
 ## 🛠️ 技术栈
 
-**前端**: Gradio 4.0 (专为 AI 应用设计)  
-**AME 引擎**: v0.7.0
-- 📚 **RAG 模块**: 知识库管理、文档检索、知识分析
+**前端**: React 18 + TypeScript + Vite + Zustand  
+**后端**: FastAPI 0.104+ + Python 3.11+  
+**AME 引擎**: v1.0.0
+- 📚 **RAG 模块**: 知识库管理、文档检索、智能问答
 - 💬 **MEM 模块**: 记忆学习、风格模仿、记忆管理
 - 📊 数据处理 + 📦 向量存储 (Memu/ChromaDB)
-- 🤖 LLM 调用 + 🎯 复杂检索  
-**特性**: 流式输出 + MD/PDF/HTML 导出 + 可视化统计  
-**部署**: Docker 独立构建
+- 🤖 LLM 调用 (异步+缓存+重试) + 🎯 混合检索  
+**特性**: 流式输出 + 状态持久化 + 真实 Embedding + 响应式设计  
+**部署**: Docker Compose 一键部署
 
-> **AME (详见 `ame/README.md`)**: 独立的技术模块引擎，支持自定义扩展
+> **AME (详见 `ame/README.md`)**: 独立的技术模块引擎，支持自定义扩展，v1.0.0 新增：
+> - ✅ 异步处理系统
+> - ✅ 真实 Embedding 支持
+> - ✅ 智能缓存策略
+> - ✅ 完善的错误处理
 
 
 

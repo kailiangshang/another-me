@@ -1,12 +1,16 @@
 """
 数据处理模块
-负责：文件解析、文本清洗、格式标准化
+负责:文件解析、文本清洗、格式标准化
 """
 
 import json
-from typing import List, Dict
+from typing import List, Dict, Any, Optional
 from datetime import datetime
+from pathlib import Path
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class DataProcessor:
@@ -29,27 +33,40 @@ class DataProcessor:
         else:
             raise ValueError(f"Unsupported file format: {extension}")
     
-    async def process_text(self, text: str, source: str, timestamp: str) -> Dict:
+    async def process_text(self, text: str, source: str, timestamp: Optional[str] = None) -> Dict[str, Any]:
         """
-        输入：文本内容、来源、时间戳
-        输出：标准化的文档对象
+        处理文本内容
+        
+        Args:
+            text: 文本内容
+            source: 来源
+            timestamp: 时间戳（可选）
+            
+        Returns:
+            标准化的文档对象
         """
         cleaned_text = self._clean_text(text)
         
         return {
             "content": cleaned_text,
             "source": source,
-            "timestamp": timestamp,
+            "timestamp": timestamp or datetime.now().isoformat(),
             "metadata": {
                 "length": len(cleaned_text),
                 "processed_at": datetime.now().isoformat()
             }
         }
     
-    async def _process_text_file(self, file_path: str) -> List[Dict]:
+    async def _process_text_file(self, file_path: str) -> List[Dict[str, Any]]:
         """处理文本文件"""
-        with open(file_path, 'r', encoding='utf-8') as f:
-            content = f.read()
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+        except UnicodeDecodeError:
+            # 尝试其他编码
+            logger.warning(f"UTF-8 decoding failed for {file_path}, trying GBK")
+            with open(file_path, 'r', encoding='gbk') as f:
+                content = f.read()
         
         # 按段落分割
         paragraphs = self._split_into_paragraphs(content)
@@ -59,14 +76,14 @@ class DataProcessor:
             if len(para.strip()) > 10:  # 过滤太短的段落
                 doc = await self.process_text(
                     text=para,
-                    source=file_path,
-                    timestamp=datetime.now().isoformat()
+                    source=file_path
                 )
                 documents.append(doc)
         
+        logger.info(f"Processed {len(documents)} paragraphs from {Path(file_path).name}")
         return documents
     
-    async def _process_json_file(self, file_path: str) -> List[Dict]:
+    async def _process_json_file(self, file_path: str) -> List[Dict[str, Any]]:
         """处理 JSON 文件（如微信聊天记录导出）"""
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
@@ -76,13 +93,15 @@ class DataProcessor:
         # 假设格式：[{"content": "...", "timestamp": "...", "sender": "..."}]
         if isinstance(data, list):
             for item in data:
-                doc = await self.process_text(
-                    text=item.get("content", ""),
-                    source=f"{file_path}:{item.get('sender', 'unknown')}",
-                    timestamp=item.get("timestamp", datetime.now().isoformat())
-                )
-                documents.append(doc)
+                if isinstance(item, dict) and item.get("content"):
+                    doc = await self.process_text(
+                        text=item.get("content", ""),
+                        source=f"{file_path}:{item.get('sender', 'unknown')}",
+                        timestamp=item.get("timestamp")
+                    )
+                    documents.append(doc)
         
+        logger.info(f"Processed {len(documents)} messages from {Path(file_path).name}")
         return documents
     
     def _clean_text(self, text: str) -> str:
