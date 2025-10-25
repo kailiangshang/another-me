@@ -110,10 +110,19 @@ another-me/
 # 一键启动前后端服务
 ./start.sh
 
-# 前端: http://localhost:5173
-# 后端API: http://localhost:8000
-# API文档: http://localhost:8000/docs
+# 访问:
+# - 前端: http://localhost:5173
+# - 后端API: http://localhost:8000
+# - API文档: http://localhost:8000/docs
+
+# 停止服务
+./stop.sh
 ```
+
+**功能特性**：
+- ✅ 自动检查环境 (Python 3.11+, Node.js 18+)
+- ✅ 自动安装依赖
+- ✅ 后台运行，日志文件记录
 
 ### 方式 2：Docker 部署
 
@@ -122,8 +131,9 @@ another-me/
 cd deployment
 ./deploy.sh
 
-# 访问: http://localhost (前端)
-# API: http://localhost:8000
+# 访问:
+# - 前端: http://localhost
+# - 后端API: http://localhost:8000
 ```
 
 ### 🔑 初次使用
